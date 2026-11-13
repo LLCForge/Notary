@@ -34,7 +34,7 @@ pub fn suggest(table: Option<&VrpTable>, asn: u32, announced: &[Prefix]) -> Vec<
             },
         })
         .collect();
-    v.sort_by(|a, b| a.prefix.cmp(&b.prefix));
+    v.sort_by_key(|a| a.prefix);
     v.dedup();
     v
 }

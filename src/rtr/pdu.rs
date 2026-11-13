@@ -301,12 +301,17 @@ pub fn decode(buf: &[u8]) -> Result<Pdu, PduError> {
             })
         }
         TYPE_ASPA if version >= 2 => {
-            if len < 12 || (len - 12) % 4 != 0 {
+            if len < 12 || !(len - 12).is_multiple_of(4) {
                 return Err(PduError::BadLength(len as u32));
             }
             let announce = buf[2] & 1 == 1;
             let customer = u32_at(buf, 8);
-            let providers: Vec<u32> = buf[12..].chunks_exact(4).map(|c| u32_at(c, 0)).collect();
+            let providers: Vec<u32> = buf[12..]
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .map(|c| u32::from_be_bytes(*c))
+                .collect();
             if announce {
                 if providers.is_empty() {
                     return Err(PduError::AspaProviders("announcement without providers"));
