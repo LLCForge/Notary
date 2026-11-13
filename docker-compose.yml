@@ -1,0 +1,23 @@
+# Example: docker compose up -d
+# Put secrets (bot tokens, routing keys, ...) in ./notary.env (KEY=value lines,
+# never committed) and reference them from the TOML via *_env settings.
+services:
+  notary:
+    image: ghcr.io/llcforge/notary:latest
+    # build: .
+    restart: unless-stopped
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    env_file:
+      - path: ./notary.env
+        required: false
+    volumes:
+      - ./notary.toml:/etc/notary/notary.toml:ro
+      - notary-data:/data
+    ports:
+      # Metrics + /healthz + /readyz. Bind to loopback; expose deliberately.
+      - "127.0.0.1:8323:8323"
+
+volumes:
+  notary-data:

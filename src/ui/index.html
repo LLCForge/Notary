@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notary</title>
+<link rel="stylesheet" href="/ui/app.css">
+<script src="/ui/app.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header>
+  <h1>Notary</h1>
+  <p class="sub">RPKI Route Origin Validation</p>
+  <p id="status" class="status" role="status" aria-live="polite">Loading status...</p>
+</header>
+<main id="main">
+  <section aria-labelledby="search-h">
+    <h2 id="search-h">Check a route</h2>
+    <form id="check">
+      <div class="row">
+        <label>Prefix <input name="prefix" required maxlength="64" placeholder="192.0.2.0/24" autocomplete="off" spellcheck="false"></label>
+        <label>Origin AS <input name="asn" required maxlength="16" placeholder="AS64500" autocomplete="off" spellcheck="false"></label>
+        <button type="submit">Validate</button>
+      </div>
+      <details>
+        <summary>API token</summary>
+        <label>Bearer token (kept in this page only) <input name="token" type="password" maxlength="512" autocomplete="off"></label>
+      </details>
+    </form>
+    <div id="result" aria-live="polite"></div>
+  </section>
+  <section aria-labelledby="hist-h">
+    <h2 id="hist-h">VRP changes for this prefix</h2>
+    <div id="history"><p class="muted">Search a prefix to see its VRP history.</p></div>
+  </section>
+</main>
+<footer><p class="muted">Read-only view of the local Notary API.</p></footer>
+</body>
+</html>

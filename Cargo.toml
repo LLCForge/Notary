@@ -1,0 +1,67 @@
+[package]
+name = "notary"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/LLCForge/Notary"
+authors = ["LLCForge contributors"]
+description = "RPKI Route Origin Validation checker with RTR client, watch daemon and query API"
+readme = "README.md"
+keywords = ["rpki", "bgp", "rtr", "roa", "network"]
+categories = ["command-line-utilities", "network-programming"]
+rust-version = "1.89"
+
+[dependencies]
+anyhow = "1"
+chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
+axum = { version = "0.8", default-features = false, features = ["http1", "json", "query", "tokio"] }
+clap = { version = "4", features = ["derive"] }
+llcforge-alert = { path = "crates/llcforge-alert", version = "0.1" }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
+# Pure-Rust crypto only (ring); no RSA: the rsa crate carries RUSTSEC-2023-0071.
+russh = { version = "0.65", default-features = false, features = ["ring"] }
+rustls = { version = "0.23", default-features = false, features = ["std", "ring", "tls12", "logging"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "net", "io-util", "time", "signal", "sync", "fs"] }
+tokio-rustls = { version = "0.26", default-features = false, features = ["ring", "tls12", "logging"] }
+toml = "0.8"
+tracing = "0.1"
+webpki-roots = "1"
+
+[package.metadata.deb]
+maintainer = "LLCForge contributors <https://github.com/LLCForge>"
+copyright = "2026, LLCForge contributors"
+license-file = ["LICENSE", "0"]
+extended-description = "RPKI Route Origin Validation checker with RTR client, watch daemon and query API"
+section = "net"
+priority = "optional"
+depends = "$auto"
+assets = [
+    ["target/release/notary", "usr/bin/", "755"],
+    ["notary.example.toml", "etc/notary/notary.toml", "644"],
+    ["README.md", "usr/share/doc/notary/README.md", "644"],
+    ["NOTICE", "usr/share/doc/notary/NOTICE", "644"],
+]
+conf-files = ["/etc/notary/notary.toml"]
+# Installs packaging/systemd/notary.service and the matching maintainer scripts;
+# the unit is not enabled automatically (configure first, then enable).
+systemd-units = { unit-name = "notary", unit-scripts = "packaging/systemd", enable = false, start = false }
+
+[package.metadata.generate-rpm]
+license = "MIT"
+summary = "RPKI Route Origin Validation checker with RTR client, watch daemon and query API"
+assets = [
+    { source = "target/release/notary", dest = "/usr/bin/notary", mode = "755" },
+    { source = "packaging/systemd/notary.service", dest = "/usr/lib/systemd/system/notary.service", mode = "644" },
+    { source = "notary.example.toml", dest = "/etc/notary/notary.toml", mode = "644", config = "noreplace" },
+    { source = "README.md", dest = "/usr/share/doc/notary/README.md", mode = "644", doc = true },
+    { source = "LICENSE", dest = "/usr/share/licenses/notary/LICENSE", mode = "644", doc = true },
+]
+post_install_script = "systemctl daemon-reload >/dev/null 2>&1 || :"
+post_uninstall_script = "systemctl daemon-reload >/dev/null 2>&1 || :"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1

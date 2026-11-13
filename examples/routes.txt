@@ -1,0 +1,10 @@
+# notary check --file examples/routes.txt --vrps examples/vrps.json
+# One "prefix origin" per line; '#' starts a comment.
+192.0.2.0/24        AS64500
+198.51.100.0/24     AS64501
+198.51.100.128/25   AS64502
+198.51.100.0/24     AS64500
+203.0.113.128/25    AS64502
+2001:db8:1000::/36  AS64503
+2001:db8:ffff::/48  AS64500
+192.0.2.0/25        AS64500

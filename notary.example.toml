@@ -1,0 +1,107 @@
+# Notary daemon configuration (`notary run --config notary.toml`).
+# Addresses and AS numbers below are documentation / private-use values.
+# Secrets are never written here: every *_env key names an environment variable.
+
+# Queue, silences, watch state and VRP history live here. Default: the platform
+# data directory ($STATE_DIRECTORY under systemd, %ProgramData%\LLCForge\notary
+# on Windows, ~/Library/Application Support/notary on macOS).
+# data_dir = "/var/lib/notary"
+
+[vrp]
+# Exactly one VRP source.
+# RTR cache (Routinator, rpki-client + StayRTR, FORT, ...). Plain TCP:
+# rtr = "192.0.2.10:3323"
+# TLS (RFC 6810 section 7.2, default port 324):
+# rtr = "tls://rpki.example.net"
+# SSH subsystem "rpki-rtr" (default port 22); host key pinned below:
+# rtr = "ssh://rtr@rpki.example.net:22"
+# Highest RTR version to offer: 1 = RFC 8210, 2 = 8210bis with ASPA. Notary
+# steps down automatically when the cache answers "unsupported version".
+# rtr_max_version = 2
+#
+# JSON export ({"roas":[...], "aspas":[...]}) from a local path or an http(s):// URL.
+# rpki-client JSON and Routinator "jsonext" also carry ROA expiry times.
+json = "examples/vrps.json"
+json_refresh_secs = 600      # JSON only: reload interval
+json_expire_secs = 7200      # JSON only: report data stale after this long without a reload
+# RFC 8416 local exceptions applied on top of the source:
+# slurm = ["examples/slurm.json"]
+# Warn when every ROA that makes a watched route Valid expires within N days (0 = off).
+expiry_warn_days = 7
+
+# [vrp.transport]
+# tls_ca_file = "/etc/notary/rtr-ca.pem"        # default: built-in Mozilla roots
+# tls_server_name = "rpki.example.net"
+# tls_client_cert = "/etc/notary/client.pem"    # mutual TLS (optional)
+# tls_client_key = "/etc/notary/client.key"
+# ssh_key_file = "/etc/notary/rtr_ed25519"      # Ed25519 / ECDSA OpenSSH key
+# ssh_key_passphrase_env = "NOTARY_SSH_PASSPHRASE"
+# ssh_password_env = "NOTARY_SSH_PASSWORD"      # instead of a key
+# ssh_host_key = "SHA256:AbCdEf..."             # required for ssh://
+
+# Individual prefix/origin pairs to keep validating.
+[[watch]]
+prefix = "192.0.2.0/24"
+origin = 64500
+
+[[watch]]
+prefix = "198.51.100.0/24"
+origin = "AS64500"
+
+[[watch]]
+prefix = "203.0.113.128/25"
+origin = 64502
+
+# Every prefix an AS currently originates, from the enabled [prefix_sources].
+[[watch_as]]
+asn = 64501
+
+[ripestat]
+refresh_secs = 3600          # refresh interval for every prefix source
+max_prefixes_per_as = 10000
+
+[prefix_sources]
+ripestat = true
+# Your own routers' view via Pathology's read-only API:
+# pathology_url = "http://127.0.0.1:8180"
+# pathology_token_env = "PATHOLOGY_API_TOKEN"
+# bgp.tools table dump (at most every 30 minutes; identify yourself):
+# bgptools = true
+# bgptools_user_agent = "example-noc notary - noc@example.net"
+
+[api]
+enabled = true
+listen = "127.0.0.1:8323"    # also serves /healthz, /readyz, /metrics and the web UI
+# token_env = "NOTARY_API_TOKEN"   # bearer token for /v1/* (min. 16 bytes)
+ui = true
+max_batch = 10000
+
+[history]
+enabled = true
+max_bytes = 67108864         # rotate vrp-history.jsonl to .1 at 64 MiB
+max_listed = 10000           # VRPs itemised per change event (counts stay exact)
+
+[alerts]
+dedup_window_secs = 300
+
+[[alerts.sink]]
+type = "stdout"
+format = "text"
+
+# [[alerts.sink]]
+# type = "webhook"
+# url_env = "NOTARY_WEBHOOK_URL"
+# hmac_secret_env = "NOTARY_WEBHOOK_SECRET"
+#
+# [[alerts.sink]]
+# type = "telegram"
+# bot_token_env = "NOTARY_TELEGRAM_TOKEN"
+# chat_id = -1001234567890
+# min_severity = "warning"
+
+[silences]
+# api_token_env = "NOTARY_ADMIN_TOKEN"   # mounts /v1/silences
+
+[health]
+# admin_token_env = "NOTARY_ADMIN_TOKEN" # mounts POST /v1/reload
+# listen = "127.0.0.1:9184"              # optional separate health listener

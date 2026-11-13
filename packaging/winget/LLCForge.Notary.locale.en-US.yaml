@@ -1,0 +1,18 @@
+# winget default-locale manifest for Notary. @VERSION@ is filled in by the release workflow.
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: LLCForge.Notary
+PackageVersion: "@VERSION@"
+PackageLocale: en-US
+Publisher: LLCForge
+PublisherUrl: https://github.com/LLCForge
+PackageName: Notary
+PackageUrl: https://github.com/LLCForge/Notary
+License: MIT
+LicenseUrl: https://github.com/LLCForge/Notary/blob/main/LICENSE
+ShortDescription: RPKI Route Origin Validation checker with RTR client, watch daemon and query API
+Tags:
+  - networking
+  - monitoring
+  - llcforge
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

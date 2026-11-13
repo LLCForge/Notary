@@ -1,0 +1,38 @@
+# Cargo.toml fragment for Notary packaging. Paste both tables at the end of
+# the tool's Cargo.toml (sync.py does not edit Cargo.toml). The release
+# workflow runs `cargo deb --no-build --target <triple>` and
+# `cargo generate-rpm --target <triple>`; both rewrite target/release/ to
+# target/<triple>/release/ automatically.
+
+[package.metadata.deb]
+# Replace with the project's packaging contact before the first release.
+maintainer = "LLCForge contributors <https://github.com/LLCForge>"
+copyright = "2026, LLCForge contributors"
+license-file = ["LICENSE", "0"]
+extended-description = "RPKI Route Origin Validation checker with RTR client, watch daemon and query API"
+section = "net"
+priority = "optional"
+depends = "$auto"
+assets = [
+    ["target/release/notary", "usr/bin/", "755"],
+    ["notary.example.toml", "etc/notary/notary.toml", "644"],
+    ["README.md", "usr/share/doc/notary/README.md", "644"],
+    ["NOTICE", "usr/share/doc/notary/NOTICE", "644"],
+]
+conf-files = ["/etc/notary/notary.toml"]
+# Installs packaging/systemd/notary.service and the matching maintainer scripts;
+# the unit is not enabled automatically (configure first, then enable).
+systemd-units = { unit-name = "notary", unit-scripts = "packaging/systemd", enable = false, start = false }
+
+[package.metadata.generate-rpm]
+license = "MIT"
+summary = "RPKI Route Origin Validation checker with RTR client, watch daemon and query API"
+assets = [
+    { source = "target/release/notary", dest = "/usr/bin/notary", mode = "755" },
+    { source = "packaging/systemd/notary.service", dest = "/usr/lib/systemd/system/notary.service", mode = "644" },
+    { source = "notary.example.toml", dest = "/etc/notary/notary.toml", mode = "644", config = "noreplace" },
+    { source = "README.md", dest = "/usr/share/doc/notary/README.md", mode = "644", doc = true },
+    { source = "LICENSE", dest = "/usr/share/licenses/notary/LICENSE", mode = "644", doc = true },
+]
+post_install_script = "systemctl daemon-reload >/dev/null 2>&1 || :"
+post_uninstall_script = "systemctl daemon-reload >/dev/null 2>&1 || :"

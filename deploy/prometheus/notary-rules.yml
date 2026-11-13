@@ -1,0 +1,116 @@
+# Prometheus alerting rules for Notary (generic llcforge-alert metrics).
+# Load with `rule_files: ["notary-rules.yml"]` or as a PrometheusRule `spec`.
+# Assumes the scrape job is named "notary"; adjust the `job` matcher if not.
+groups:
+  - name: notary.availability
+    rules:
+      - alert: NotaryDown
+        expr: up{job="notary"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Notary is down on {{ $labels.instance }}"
+          description: "The Notary metrics endpoint has not been scrapeable for 5 minutes."
+
+      - alert: NotaryAbsent
+        expr: absent(up{job="notary"})
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No Notary targets are being scraped"
+
+  - name: notary.alert-delivery
+    rules:
+      - alert: NotaryAlertDeliveryFailing
+        expr: increase(llcforge_alert_sink_failed_total{tool="notary"}[15m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Notary cannot deliver alerts to sink {{ $labels.sink }} ({{ $labels.type }})"
+          description: "{{ $value | humanize }} delivery failures in 15 minutes. Undelivered alerts stay queued and are retried."
+
+      - alert: NotaryAlertsDropped
+        expr: increase(llcforge_alert_dropped_total{tool="notary"}[15m]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Notary dropped alerts on {{ $labels.instance }}"
+          description: "Alerts were dropped (intake channel full, queue bound reached or delivery expired)."
+
+      - alert: NotaryAlertQueueBacklog
+        expr: llcforge_alert_queue_depth{tool="notary"} > 100
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Notary alert queue backlog: {{ $value }} pending"
+          description: "Alerts are accumulating faster than sinks accept them, or a sink has been down for 15 minutes."
+
+      - alert: NotarySinkBacklog
+        expr: llcforge_alert_sink_queued{tool="notary"} > 50
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Notary sink {{ $labels.sink }} has {{ $value }} undelivered alerts"
+
+  - name: notary.rpki
+    rules:
+      - alert: NotaryVrpDataStale
+        expr: notary_vrp_stale{job="notary"} == 1
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Notary VRP data is stale on {{ $labels.instance }}"
+          description: "No successful RTR/JSON update within the expire interval; validity answers carry stale=true."
+
+      - alert: NotaryVrpSourceErrors
+        expr: increase(notary_vrp_source_errors_total{job="notary"}[30m]) > 3
+        labels:
+          severity: warning
+        annotations:
+          summary: "Notary VRP source failing on {{ $labels.instance }}"
+          description: "{{ $value | humanize }} failed RTR sessions or JSON loads in 30 minutes."
+
+      - alert: NotaryEmptyVrpSetRefused
+        expr: increase(notary_vrp_empty_rejected_total{job="notary"}[1h]) > 0
+        labels:
+          severity: critical
+        annotations:
+          summary: "Notary refused an empty VRP set on {{ $labels.instance }}"
+          description: "The validator delivered no VRPs; the previous set is kept. Check the cache."
+
+      - alert: NotaryWatchedRouteInvalid
+        expr: notary_watch_invalid{job="notary"} > 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $value }} watched route(s) are RPKI Invalid"
+          description: "Networks dropping RPKI-invalid routes will reject them. See Notary alerts for prefixes."
+
+      - alert: NotaryRoaExpiring
+        expr: notary_watch_roa_expiring{job="notary"} > 0
+        for: 1h
+        labels:
+          severity: warning
+        annotations:
+          summary: "{{ $value }} watched route(s) depend on ROAs that expire soon"
+
+      - alert: NotaryPrefixSourceFailing
+        expr: increase(notary_prefix_source_errors_total{job="notary"}[3h]) > 3
+        labels:
+          severity: warning
+        annotations:
+          summary: "Notary cannot refresh announced-prefix lists (RIPEstat / Pathology / bgp.tools)"
+
+      - alert: NotaryHistoryWriteErrors
+        expr: increase(notary_history_errors_total{job="notary"}[1h]) > 0
+        labels:
+          severity: warning
+        annotations:
+          summary: "Notary cannot write the VRP change history on {{ $labels.instance }}"

@@ -1,0 +1,15 @@
+{
+  "slurmVersion": 1,
+  "validationOutputFilters": {
+    "prefixFilters": [
+      { "prefix": "203.0.113.0/24", "comment": "Ignore the AS0 ROA while the space is being moved" }
+    ],
+    "bgpsecFilters": []
+  },
+  "locallyAddedAssertions": {
+    "prefixAssertions": [
+      { "asn": 64504, "prefix": "198.18.0.0/15", "maxPrefixLength": 15, "comment": "Lab space, not in any RIR" }
+    ],
+    "bgpsecAssertions": []
+  }
+}

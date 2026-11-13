@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Notary launchd daemon for macOS.
+  Install:
+    sudo mkdir -p /usr/local/etc/notary /usr/local/var/lib/notary /usr/local/var/log
+    sudo cp notary.example.toml /usr/local/etc/notary/notary.toml
+    sudo chown -R nobody:nobody /usr/local/var/lib/notary
+    sudo touch /usr/local/var/log/notary.log && sudo chown nobody /usr/local/var/log/notary.log
+    sudo cp net.llcforge.notary.plist /Library/LaunchDaemons/
+    sudo launchctl bootstrap system /Library/LaunchDaemons/net.llcforge.notary.plist
+  Reload config: sudo launchctl kill HUP system/net.llcforge.notary
+  Secrets: add them under EnvironmentVariables below and keep this file
+  mode 0600 root:wheel, or source them from a wrapper script.
+  On Apple silicon with Homebrew, the binary lives in /opt/homebrew/bin.
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>net.llcforge.notary</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/notary</string>
+    <string>run</string>
+    <string>--config</string>
+    <string>/usr/local/etc/notary/notary.toml</string>
+  </array>
+  <key>UserName</key>
+  <string>nobody</string>
+  <key>GroupName</key>
+  <string>nobody</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>STATE_DIRECTORY</key>
+    <string>/usr/local/var/lib/notary</string>
+  </dict>
+  <key>WorkingDirectory</key>
+  <string>/usr/local/var/lib/notary</string>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+  <key>ThrottleInterval</key>
+  <integer>10</integer>
+  <key>Umask</key>
+  <integer>63</integer>
+  <key>StandardOutPath</key>
+  <string>/usr/local/var/log/notary.log</string>
+  <key>StandardErrorPath</key>
+  <string>/usr/local/var/log/notary.log</string>
+</dict>
+</plist>

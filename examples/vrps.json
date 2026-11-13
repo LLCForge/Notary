@@ -1,0 +1,18 @@
+{
+  "metadata": {
+    "generated": 1767225600,
+    "generatedTime": "2026-01-01T00:00:00Z"
+  },
+  "roas": [
+    { "prefix": "192.0.2.0/24", "maxLength": 24, "asn": "AS64500", "ta": "example" },
+    { "prefix": "198.51.100.0/24", "maxLength": 24, "asn": "AS64501", "ta": "example" },
+    { "prefix": "198.51.100.0/24", "maxLength": 26, "asn": "AS64502", "ta": "example" },
+    { "prefix": "203.0.113.0/25", "maxLength": 32, "asn": "AS0", "ta": "example" },
+    { "prefix": "2001:db8::/32", "maxLength": 48, "asn": 64500, "ta": "example" },
+    { "prefix": "2001:db8:1000::/36", "maxLength": 36, "asn": 64503, "ta": "example", "expires": 1798761600 }
+  ],
+  "aspas": [
+    { "customer_asid": 64500, "expires": 1798761600, "providers": [64510, 64511] },
+    { "customer_asid": 64510, "expires": 1798761600, "providers": [64520] }
+  ]
+}
