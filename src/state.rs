@@ -5,7 +5,7 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, PoisonError, RwLock};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use llcforge_alert::{Alert, AlertHandle, Readiness, Severity};
+use llcforge_beacon::{Alert, AlertHandle, Readiness, Severity};
 use serde::Serialize;
 use tokio::sync::watch;
 
@@ -160,8 +160,8 @@ impl AppState {
         }
     }
 
-    /// Delivery metrics of the current dispatcher (`llcforge_alert_*`).
-    pub fn alert_metrics(&self) -> Arc<llcforge_alert::Metrics> {
+    /// Delivery metrics of the current dispatcher (`llcforge_beacon_*`).
+    pub fn alert_metrics(&self) -> Arc<llcforge_beacon::Metrics> {
         self.alerts
             .read()
             .unwrap_or_else(PoisonError::into_inner)

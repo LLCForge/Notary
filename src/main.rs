@@ -23,8 +23,8 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use clap::{Args, Parser, Subcommand};
-use llcforge_alert::cli::{run_silence_command, ServiceCommand, SilenceCommand};
-use llcforge_alert::{init_logging, run_service_command, LogFormat};
+use llcforge_beacon::cli::{run_silence_command, ServiceCommand, SilenceCommand};
+use llcforge_beacon::{init_logging, run_service_command, LogFormat};
 
 use crate::aspa::Direction;
 use crate::rtr::transport::TransportConfig;
@@ -224,7 +224,7 @@ fn main() -> ExitCode {
     }
     let config = cli.config;
     let result = match cli.command {
-        Command::Run => llcforge_alert::service::run_foreground(config, daemon::daemon)
+        Command::Run => llcforge_beacon::service::run_foreground(config, daemon::daemon)
             .map(|()| ExitCode::SUCCESS),
         Command::Service { cmd } => {
             run_service_command(&daemon::SPEC, cmd.into_action(config), daemon::daemon)

@@ -47,7 +47,7 @@ Giderek daha fazla ağ RPKI-invalid rotaları düşürüyor. Yanlış maxLength'
 - **Toplu denetim:** dosyadan veya stdin'den, metin ya da JSON Lines çıktısıyla.
 - **VRP değişim geçmişi:** uygulanan her güncelleme bir öncekiyle karşılaştırılıp dönen (rotate edilen) bir JSON Lines dosyasına eklenir; prefix, ASN ve zamana göre sorgulanır (`notary history`, `GET /v1/history`).
 - **`[[watch_as]]` için prefix kaynakları:** RIPEstat, Pathology `/v1/origins` üzerinden kendi router'larının görüşü ve bgp.tools tablo dökümü (birleşim; her kaynak için son geçerli liste korunur).
-- **Daemon** (`notary run`): kalıcı izleme durumu (yeniden başlatmada tekrar alarm yok, kapalıyken olan değişim yakalanır); ortak [llcforge-alert](crates/llcforge-alert) dağıtıcısı üzerinden alarm (Telegram, HMAC imzalı webhook, Slack, Discord, Teams, e-posta, PagerDuty, Opsgenie, syslog, stdout), çökmeye dayanıklı kuyruk, susturma (silence), tekilleştirme; `/healthz` `/readyz`; SIGHUP, dosya değişimi veya `POST /v1/reload` ile yapılandırmayı yeniden yükleme; Windows hizmeti, systemd ve launchd.
+- **Daemon** (`notary run`): kalıcı izleme durumu (yeniden başlatmada tekrar alarm yok, kapalıyken olan değişim yakalanır); ortak [llcforge-beacon](crates/llcforge-beacon) dağıtıcısı üzerinden alarm (Telegram, HMAC imzalı webhook, Slack, Discord, Teams, e-posta, PagerDuty, Opsgenie, syslog, stdout), çökmeye dayanıklı kuyruk, susturma (silence), tekilleştirme; `/healthz` `/readyz`; SIGHUP, dosya değişimi veya `POST /v1/reload` ile yapılandırmayı yeniden yükleme; Windows hizmeti, systemd ve launchd.
 - **HTTP API ve web arayüzü** `127.0.0.1:8323` üzerinde: tekli ve toplu validity, durum, geçmiş, ASPA, Prometheus `/metrics` ve gömülü prefix arama sayfası. İsteğe bağlı bearer token.
 
 ## Ailedeki yeri
@@ -232,7 +232,7 @@ curl -X POST http://127.0.0.1:8323/v1/validity -H 'Content-Type: application/jso
 | `GET /v1/history?prefix=&asn=&since=&limit=` | VRP değişim olayları, en yeniden eskiye |
 | `GET /v1/aspa?path=64511+64500&direction=upstream` | Adım adım sonuçlarla ASPA doğrulaması |
 | `GET /healthz`, `GET /readyz` | Canlılık; hazır olma = VRP verisi yüklü ve taze |
-| `GET /metrics` | `notary_*` ve `llcforge_alert_*` Prometheus metrikleri |
+| `GET /metrics` | `notary_*` ve `llcforge_beacon_*` Prometheus metrikleri |
 | `GET /` | Web arayüzü: prefix arama, kapsayan VRP'ler, VRP geçmişi |
 | `/v1/silences`, `POST /v1/reload` | Yalnızca yönetici token'ları ayarlıysa açılır |
 

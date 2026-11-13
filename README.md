@@ -47,7 +47,7 @@ More and more networks drop RPKI-invalid routes. A ROA with the wrong maxLength 
 - **Bulk checks** from a file or stdin, text or JSON Lines.
 - **VRP change history:** every applied update is diffed and appended to a rotated JSON Lines log, queryable by prefix, ASN and time (`notary history`, `GET /v1/history`).
 - **Prefix sources for `[[watch_as]]`:** RIPEstat, your own routers via Pathology `/v1/origins`, and the bgp.tools table dump (union, last good list kept per source).
-- **Daemon** (`notary run`): persistent watch state (no re-alerts after a restart, changes during downtime are caught), alerts through the shared [llcforge-alert](crates/llcforge-alert) dispatcher (Telegram, webhook with HMAC, Slack, Discord, Teams, e-mail, PagerDuty, Opsgenie, syslog, stdout) with a crash-safe queue, silences, dedup; `/healthz` `/readyz`; config reload on SIGHUP, file change or `POST /v1/reload`; Windows service, systemd and launchd.
+- **Daemon** (`notary run`): persistent watch state (no re-alerts after a restart, changes during downtime are caught), alerts through the shared [llcforge-beacon](crates/llcforge-beacon) dispatcher (Telegram, webhook with HMAC, Slack, Discord, Teams, e-mail, PagerDuty, Opsgenie, syslog, stdout) with a crash-safe queue, silences, dedup; `/healthz` `/readyz`; config reload on SIGHUP, file change or `POST /v1/reload`; Windows service, systemd and launchd.
 - **HTTP API and web UI** on `127.0.0.1:8323`: single and batch validity, status, history, ASPA, Prometheus `/metrics`, and an embedded prefix-search page. Optional bearer token.
 
 ## Where it fits in the suite
@@ -232,7 +232,7 @@ curl -X POST http://127.0.0.1:8323/v1/validity -H 'Content-Type: application/jso
 | `GET /v1/history?prefix=&asn=&since=&limit=` | VRP change events, newest first |
 | `GET /v1/aspa?path=64511+64500&direction=upstream` | ASPA verification with per-hop outcomes |
 | `GET /healthz`, `GET /readyz` | Liveness; readiness = VRP data loaded and fresh |
-| `GET /metrics` | `notary_*` and `llcforge_alert_*` Prometheus metrics |
+| `GET /metrics` | `notary_*` and `llcforge_beacon_*` Prometheus metrics |
 | `GET /` | Web UI: prefix search, covering VRPs, VRP history |
 | `/v1/silences`, `POST /v1/reload` | Mounted only when their admin tokens are configured |
 

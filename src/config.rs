@@ -4,7 +4,7 @@ use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 
 use anyhow::{bail, Context};
-use llcforge_alert::{AlertsConfig, HealthConfig, SilencesConfig};
+use llcforge_beacon::{AlertsConfig, HealthConfig, SilencesConfig};
 use serde::Deserialize;
 
 use crate::prefix::{Asn, Prefix};
@@ -314,7 +314,7 @@ impl Config {
             let token = p
                 .pathology_token_env
                 .as_deref()
-                .map(llcforge_alert::env_secret)
+                .map(llcforge_beacon::env_secret)
                 .transpose()?;
             out.push(PrefixSource::Pathology {
                 url: url.trim_end_matches('/').to_string(),
@@ -349,14 +349,14 @@ impl Config {
     pub fn data_dir(&self) -> PathBuf {
         self.data_dir
             .clone()
-            .unwrap_or_else(|| llcforge_alert::default_data_dir(crate::state::TOOL))
+            .unwrap_or_else(|| llcforge_beacon::default_data_dir(crate::state::TOOL))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use llcforge_alert::config::SinkKind;
+    use llcforge_beacon::config::SinkKind;
 
     #[test]
     fn example_config_parses() {
@@ -449,9 +449,9 @@ mod tests {
             "[vrp]\nrtr = \"a:1\"\n[alerts]\nwebhook_url_env = \"NOTARY_TEST_SURELY_UNSET_VAR\"\n",
         )
         .unwrap();
-        let r = llcforge_alert::Dispatcher::start(
+        let r = llcforge_beacon::Dispatcher::start(
             &c.alerts,
-            llcforge_alert::DispatcherOptions {
+            llcforge_beacon::DispatcherOptions {
                 tool: "notary".into(),
                 ..Default::default()
             },

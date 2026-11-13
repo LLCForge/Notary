@@ -16,7 +16,7 @@ anyhow = "1"
 chrono = { version = "0.4", default-features = false, features = ["std", "clock", "serde"] }
 axum = { version = "0.8", default-features = false, features = ["http1", "json", "query", "tokio"] }
 clap = { version = "4", features = ["derive"] }
-llcforge-alert = { path = "crates/llcforge-alert", version = "0.1" }
+llcforge-beacon = { path = "crates/llcforge-beacon", version = "0.1" }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json"] }
 # Pure-Rust crypto only (ring); no RSA: the rsa crate carries RUSTSEC-2023-0071.
 russh = { version = "0.65", default-features = false, features = ["ring"] }

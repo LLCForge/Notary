@@ -10,7 +10,7 @@ After=network-online.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/notary run --config /etc/notary/notary.toml
-# SIGHUP triggers the llcforge-alert ReloadSignal (config reload).
+# SIGHUP triggers the llcforge-beacon ReloadSignal (config reload).
 ExecReload=/bin/kill -HUP $MAINPID
 EnvironmentFile=-/etc/notary/notary.env
 Restart=on-failure

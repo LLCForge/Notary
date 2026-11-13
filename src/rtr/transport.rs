@@ -366,7 +366,7 @@ async fn ssh_connect(
             let pass = t
                 .ssh_key_passphrase_env
                 .as_deref()
-                .map(llcforge_alert::env_secret)
+                .map(llcforge_beacon::env_secret)
                 .transpose()?;
             let key = russh::keys::load_secret_key(path, pass.as_deref())
                 .with_context(|| format!("loading SSH key {}", path.display()))?;
@@ -375,7 +375,7 @@ async fn ssh_connect(
         }
         (None, Some(var)) => {
             session
-                .authenticate_password(user, llcforge_alert::env_secret(var)?)
+                .authenticate_password(user, llcforge_beacon::env_secret(var)?)
                 .await?
         }
         (None, None) => bail!("ssh_key_file or ssh_password_env is required"),

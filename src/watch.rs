@@ -8,7 +8,7 @@ use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use std::time::Duration;
 
-use llcforge_alert::Severity;
+use llcforge_beacon::Severity;
 use serde::{Deserialize, Serialize};
 
 use crate::config::Config;

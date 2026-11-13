@@ -11,7 +11,7 @@ This document describes how Notary is put together, where its trust boundaries a
 - **Untrusted input everywhere.** RTR PDUs, JSON exports, SLURM files, RIPEstat / Pathology / bgp.tools / RIPE DB / whois responses and API requests are parsed defensively with explicit size limits. No `unsafe`.
 - **Secrets from the environment.** Tokens, passwords and keys' passphrases are read from environment variables named in the config, never from config files or logs.
 - **Pure Rust crypto on every OS.** rustls + ring for TLS, russh (ring backend, no RSA) for SSH; Linux, macOS and Windows build the same code.
-- **Observable.** Prometheus `/metrics` (`notary_*` plus the shared `llcforge_alert_*`), `/healthz`, `/readyz`, text or JSON logs.
+- **Observable.** Prometheus `/metrics` (`notary_*` plus the shared `llcforge_beacon_*`), `/healthz`, `/readyz`, text or JSON logs.
 
 ## Data flow
 
@@ -32,7 +32,7 @@ flowchart LR
   W --> VAL[Validator]
   W <--> WS[watch-state.json]
   Q[HTTP API / web UI / CLI] --> VAL
-  W --> D[llcforge-alert dispatcher]
+  W --> D[llcforge-beacon dispatcher]
   S --> D
   D --> SINKS[Telegram, webhook, Slack, ... syslog]
 ```
@@ -53,7 +53,7 @@ flowchart LR
 | **Prefix sources** | `src/sources.rs` | RIPEstat `announced-prefixes`, Pathology `/v1/origins` (10 s timeout, bearer token), bgp.tools `table.jsonl` (streamed, 1 GiB cap, 4 KiB line cap, identifying User-Agent, >= 30 min interval). |
 | **Watcher** | `src/watch.rs` | Union of `[[watch]]` and per-source `[[watch_as]]` prefixes; re-validates on every VRP change / refresh; `state_change` and `roa_expiring` alerts; state persisted atomically (temp file + rename) to `watch-state.json`. |
 | **Audits** | `src/audit.rs`, `src/irr.rs` | ROA suggestions (maxLength = prefix length), RFC 9319 maxLength looseness, IRR route/route6 vs ROA comparison (RIPE DB REST JSON or RPSL whois). |
-| **Alerts** | `crates/llcforge-alert` | Shared schema, dispatcher, ten sinks, persistent queue, silences, health/readiness, reload signal, service integration. Notary builds alerts with `tool = "notary"` and stable ids (`notary:<kind>:<resource>`). |
+| **Alerts** | `crates/llcforge-beacon` | Shared schema, dispatcher, ten sinks, persistent queue, silences, health/readiness, reload signal, service integration. Notary builds alerts with `tool = "notary"` and stable ids (`notary:<kind>:<resource>`). |
 | **API + UI** | `src/api.rs`, `src/ui/` | axum: `/v1/validity` (GET + batch POST), `/v1/status`, `/v1/history`, `/v1/aspa`, `/metrics`, embedded UI (`include_str!`, no CDN). Merged with the kit's health / silences / reload routers. |
 | **Daemon** | `src/daemon.rs` | Wires everything, owns its Tokio runtime (so the Windows service entry can call it), applies reloads. |
 | **CLI** | `src/main.rs`, `src/commands.rs` | `check` (single / bulk), `run`, `suggest`, `audit`, `irr`, `aspa`, `diff`, `history`, `bench`, `silence`, `service`. |
@@ -75,7 +75,7 @@ flowchart LR
 | Cache lacks RTR v2 / v1 | Steps down one version per Unsupported Version error and stays there for the session. |
 | Empty VRP set (also after SLURM) | Not applied; `vrp_empty_rejected` alert. |
 | Prefix source down | Last known list per (source, AS) is used; `notary_prefix_source_errors_total` increases. |
-| Alert sink slow or down | The dispatcher queues on disk and retries with backoff; `llcforge_alert_*` metrics show it. Alerts never block validation. |
+| Alert sink slow or down | The dispatcher queues on disk and retries with backoff; `llcforge_beacon_*` metrics show it. Alerts never block validation. |
 | Crash or restart | Watch state is reloaded (no duplicate alerts, transitions during downtime still alert); the alert queue is redelivered; history starts with a `baseline` event. |
 | Corrupt state file | Ignored with a warning; the watcher starts fresh. |
 | Bad config on reload | Rejected with an error log; the running configuration stays. |
@@ -91,7 +91,7 @@ flowchart LR
 ```
 Notary/
 ├── .github/                   CI (Linux, Windows, macOS), release, dependabot
-├── crates/llcforge-alert/     vendored shared alerting crate (sync.py)
+├── crates/llcforge-beacon/     vendored shared alerting crate (sync.py)
 ├── deploy/                    Helm chart, Grafana dashboard, Prometheus rules
 ├── packaging/                 systemd, launchd, Windows service, Homebrew, scoop, winget, deb/rpm fragment
 ├── examples/                  vrps.json, slurm.json, routes.txt fixtures

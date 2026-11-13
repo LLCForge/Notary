@@ -33,7 +33,7 @@ LABEL org.opencontainers.image.title="Notary" \
       org.opencontainers.image.licenses="MIT"
 COPY --from=build /out/notary /usr/local/bin/notary
 COPY --from=build --chown=65532:65532 /out/data /data
-# Data dir picked up by llcforge_alert::default_data_dir (queue, silences, state).
+# Data dir picked up by llcforge_beacon::default_data_dir (queue, silences, state).
 ENV STATE_DIRECTORY=/data
 VOLUME ["/data"]
 EXPOSE 8323

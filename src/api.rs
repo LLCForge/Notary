@@ -10,7 +10,7 @@ use axum::http::{header, HeaderValue, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::get;
 use axum::{Json, Router};
-use llcforge_alert::ApiToken;
+use llcforge_beacon::ApiToken;
 use serde::Deserialize;
 
 use crate::aspa::{self, Direction};
@@ -61,7 +61,7 @@ pub fn router(state: Arc<AppState>, opts: ApiOptions) -> Router {
     if let Some(token) = opts.token {
         v1 = v1.route_layer(axum::middleware::from_fn_with_state(
             token,
-            llcforge_alert::auth::require_bearer,
+            llcforge_beacon::auth::require_bearer,
         ));
     }
     let mut app = v1.route("/metrics", get(metrics));

@@ -7,7 +7,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use anyhow::Context;
-use llcforge_alert::{
+use llcforge_beacon::{
     health_router, reload_router, silences_router, ApiToken, Dispatcher, DispatcherOptions,
     ReloadSignal, ServiceSpec, Shutdown, SilenceStore,
 };
@@ -195,7 +195,8 @@ async fn run(config: PathBuf, mut shutdown: Shutdown) -> anyhow::Result<()> {
     {
         let mut sd = shutdown.clone();
         servers.push(tokio::spawn(async move {
-            if let Err(e) = llcforge_alert::serve(addr, admin, async move { sd.wait().await }).await
+            if let Err(e) =
+                llcforge_beacon::serve(addr, admin, async move { sd.wait().await }).await
             {
                 tracing::error!(error = %e, "health listener failed");
             }

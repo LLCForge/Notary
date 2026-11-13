@@ -526,7 +526,7 @@ fn data_dir(config: &Path, explicit: Option<PathBuf>) -> anyhow::Result<PathBuf>
     if config.exists() {
         return Ok(Config::load(config)?.data_dir());
     }
-    Ok(llcforge_alert::default_data_dir(crate::state::TOOL))
+    Ok(llcforge_beacon::default_data_dir(crate::state::TOOL))
 }
 
 pub fn silence_path(config: &Path) -> anyhow::Result<PathBuf> {
@@ -534,7 +534,7 @@ pub fn silence_path(config: &Path) -> anyhow::Result<PathBuf> {
         let c = Config::load(config)?;
         return Ok(c.silences.path_or(&c.data_dir()));
     }
-    Ok(llcforge_alert::default_data_dir(crate::state::TOOL).join("silences.json"))
+    Ok(llcforge_beacon::default_data_dir(crate::state::TOOL).join("silences.json"))
 }
 
 pub fn history(
